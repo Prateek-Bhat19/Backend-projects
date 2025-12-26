@@ -1,3 +1,12 @@
+Got it — the content is fine, but the **Markdown formatting wasn’t rendering correctly** for you.
+
+Below is the **same README**, rewritten with **strict, clean Markdown** so it renders properly on **GitHub / VS Code / GitLab**.
+
+Copy–paste this **as-is** into `README.md`.
+
+---
+
+````md
 # Authorization Service (RBAC + Ownership)
 
 ## Overview
@@ -28,105 +37,102 @@ Authentication is handled using **JWT access tokens**.
   "id": "<userId>",
   "role": "user | admin"
 }
+````
 
-Tokens are sent with each request using:
+* Tokens are sent with each request using:
 
+```
 Authorization: Bearer <token>
-
+```
 
 The authentication middleware:
 
-Verifies the JWT
+* Verifies the JWT
+* Attaches `req.user = { id, role }`
+* Rejects unauthenticated requests with **401 Unauthorized**
 
-Attaches req.user = { id, role }
+Authentication establishes **identity**, not permissions.
 
-Rejects unauthenticated requests with 401 Unauthorized
+---
 
-Authentication establishes identity, not permissions.
+## Authorization (Are you allowed to do this?)
 
-Authorization (Are you allowed to do this?)
+Authorization is implemented using **Role-Based Access Control (RBAC)**.
 
-Authorization is implemented using Role-Based Access Control (RBAC).
+### Roles
 
-Roles
-
-user
-
-admin
+* `user`
+* `admin`
 
 Authorization middleware:
 
-Runs after authentication
-
-Checks whether req.user.role is allowed for the route
-
-Rejects insufficient permissions with 403 Forbidden
+* Runs after authentication
+* Checks whether `req.user.role` is allowed for the route
+* Rejects insufficient permissions with **403 Forbidden**
 
 Examples:
 
-Users can create and read their notes
-
-Only admins can access admin routes
+* Users can create and read their notes
+* Only admins can access admin routes
 
 Routes declare intent; middleware enforces policy.
 
-Ownership (Is this resource yours?)
+---
+
+## Ownership (Is this resource yours?)
 
 RBAC alone is not sufficient for resource-level security.
 
 Ownership rules enforce:
 
-A user can only access their own resources
-
-An admin can access any resource
+* A `user` can only access their **own resources**
+* An `admin` can access **any resource**
 
 Ownership is implemented via middleware that:
 
-Fetches the resource
-
-Verifies ownership
-
-Allows admin override
-
-Attaches the resource to the request
+* Fetches the resource
+* Verifies ownership
+* Allows admin override
+* Attaches the resource to the request
 
 This keeps controllers clean and avoids duplicated logic.
 
-Admin Role Management
+---
 
-Role changes are explicit and restricted.
+## Admin Role Management
+
+Role changes are **explicit and restricted**.
 
 Rules:
 
-Clients cannot assign roles
-
-Registration always creates a user
-
-Only admins can promote or demote users
-
-Admins cannot change their own role
+* Clients cannot assign roles
+* Registration always creates a `user`
+* Only admins can promote or demote users
+* Admins cannot change their own role
 
 Role updates happen via a dedicated admin-only endpoint, preventing silent privilege escalation.
 
-Error Handling & HTTP Semantics
+---
 
-The application uses a centralized error handler.
+## Error Handling & HTTP Semantics
+
+The application uses a **centralized error handler**.
 
 Status code rules:
 
-401 Unauthorized → authentication failure
-
-403 Forbidden → authorization or ownership failure
-
-400 Bad Request → validation errors
-
-404 Not Found → missing resources
-
-500 Internal Server Error → server errors
+* `401 Unauthorized` → authentication failure
+* `403 Forbidden` → authorization or ownership failure
+* `400 Bad Request` → validation errors
+* `404 Not Found` → missing resources
+* `500 Internal Server Error` → server errors
 
 Controllers throw semantic errors; the error handler converts them into HTTP responses.
 
-Request Lifecycle
+---
+
+## Request Lifecycle
+
+```
 Request
   ↓
 Authentication Middleware
@@ -141,6 +147,50 @@ Ownership Middleware (if applicable)
 Controller
   ↓
 Global Error Handler
+```
 
+Each layer has a **single responsibility**.
 
-Each layer has a single responsibility.
+---
+
+## Security Characteristics
+
+* Stateless JWT authentication
+* No role assignment from client input
+* No authorization logic in controllers
+* Explicit admin-only privilege escalation
+* Ownership enforced at middleware level
+* Clean separation of concerns
+
+This mirrors real-world backend authorization systems.
+
+---
+
+## Testing
+
+The system is verified using:
+
+* Authentication tests
+* Authorization tests (`401` vs `403`)
+* Ownership enforcement tests
+* Admin-only route tests
+* Role promotion tests
+
+This ensures access control behavior is **provably correct**.
+
+---
+
+## Summary
+
+This project demonstrates a **production-grade authorization architecture** using Express, TypeScript, and MongoDB.
+
+It focuses on:
+
+* Correct security boundaries
+* Middleware-driven design
+* Clean, testable code
+* Predictable access rules
+
+The result is a backend service suitable as a foundation for larger systems.
+
+```
