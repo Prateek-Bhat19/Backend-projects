@@ -1,12 +1,6 @@
-Got it — the content is fine, but the **Markdown formatting wasn’t rendering correctly** for you.
 
-Below is the **same README**, rewritten with **strict, clean Markdown** so it renders properly on **GitHub / VS Code / GitLab**.
 
-Copy–paste this **as-is** into `README.md`.
 
----
-
-````md
 # Authorization Service (RBAC + Ownership)
 
 ## Overview
@@ -193,4 +187,4 @@ It focuses on:
 
 The result is a backend service suitable as a foundation for larger systems.
 
-```
+
