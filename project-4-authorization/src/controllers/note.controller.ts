@@ -24,12 +24,6 @@ export const getMyNotes = async (req: Request, res: Response) => {
 };
 
 export const deleteNote = async (req: Request, res: Response) => {
-  const note = await Note.findById(req.params.id);
-
-  if (!note) {
-    throw new AppError('Note not found', 404);
-  }
-
-  await note.deleteOne();
+  await req.note!.deleteOne();
   res.status(204).send();
 };

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Link Processor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    input, button {
+      padding: 8px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .status {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Smart Link Processor</h2>
+
+  <input
+    id="urlInput"
+    type="text"
+    placeholder="Paste a URL (https://...)"
+  />
+
+  <button onclick="submitLink()">Process Link</button>
+
+  <div id="output" class="result" style="display:none;"></div>
+
+  <script>
+    async function submitLink() {
+      const url = document.getElementById("urlInput").value;
+      const output = document.getElementById("output");
+
+      if (!url) {
+        alert("Please enter a URL");
+        return;
+      }
+
+      output.style.display = "block";
+      output.innerHTML = "Processing...";
+
+      try {
+        const res = await fetch("http://localhost:8001/links", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "queued") {
+          output.innerHTML = `
+            <div class="status">Queued</div>
+            <div>Job ID: ${data.jobId}</div>
+            <div>Refresh and try again in a few seconds.</div>
+          `;
+        }
+
+        if (data.status === "cached") {
+          output.innerHTML = `
+            <div class="status">From Cache</div>
+            <div><strong>Title:</strong> ${data.data.title || "N/A"}</div>
+            <div><strong>Description:</strong> ${data.data.description || "N/A"}</div>
+            <div><strong>Image:</strong> ${data.data.image || "N/A"}</div>
+          `;
+        }
+      } catch (err) {
+        output.innerHTML = "Error processing link";
+      }
+    }
+  </script>
+
+</body>
+</html>
